@@ -15,6 +15,11 @@ namespace LightBot
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
+
+            var service = new LightService(null);
+            var result = service.GetDefaultBehaviour("10.0.0.90");
+            result.Wait();
+            Console.WriteLine($"Got result: {result.Result}");
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

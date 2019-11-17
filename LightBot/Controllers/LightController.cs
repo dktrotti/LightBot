@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LightBot
 {
     [ApiController]
+    [Produces("application/json")]
     [Route("[controller]")]
     public class LightController : ControllerBase
     {
@@ -18,10 +20,15 @@ namespace LightBot
         }
 
         [HttpPost]
-        public ActionResult<string> RunDebugCommand([FromQuery] string command)
+        //public ActionResult<string> RunDebugCommand()
+        public async Task<ActionResult<string>> RunDebugCommand([FromBody] string command)
         {
-            // TODO: Run command
-            return "TODO";
+            return await lightService.RunDebugCommand("dne", UnescapeCommand(command));
+        }
+
+        private static string UnescapeCommand(string command)
+        {
+            return command.Replace(@"\""", @"""");
         }
     }
 }

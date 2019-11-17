@@ -17,6 +17,10 @@ namespace LightBot
             this.configuration = configuration;
         }
 
-
+        public async Task<string> RunDebugCommand(string location, string command)
+        {
+            // TODO: Create map of LightClients
+            return await new DebugCommand(command).Run(new LightClient(IPAddress.Parse(configuration[$"addresses:{location}"])));
+        }
     }
 }

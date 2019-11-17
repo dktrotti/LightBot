@@ -16,11 +16,6 @@ namespace LightBot
         {
             //var json = @"{""smartlife.iot.dimmer"":{""get_default_behavior"":{}}}";
 
-            //var service = new LightService(null);
-            //var result = service.GetDefaultBehaviour("10.0.0.90");
-            //result.Wait();
-            //Console.WriteLine($"Got result: {result.Result}");
-
             CreateWebHostBuilder(args).Build().Run();
         }
 

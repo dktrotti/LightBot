@@ -19,16 +19,25 @@ namespace LightBot
             this.lightService = lightService;
         }
 
-        [HttpPost]
-        //public ActionResult<string> RunDebugCommand()
-        public async Task<ActionResult<string>> RunDebugCommand([FromBody] string command)
+        [HttpPost("{location}/debug")]
+        public async Task<ActionResult<string>> RunDebugCommand(string location, [FromBody] string command)
         {
-            return await lightService.RunDebugCommand("dne", UnescapeCommand(command));
+#if DEBUG
+            return await lightService.RunDebugCommand(location, UnescapeCommand(command));
+#else
+            return "Not in debug mode!";
+#endif
         }
 
         private static string UnescapeCommand(string command)
         {
             return command.Replace(@"\""", @"""");
+        }
+
+        [HttpPost("{location}/set_state")]
+        public async Task<ActionResult<Unit>> SetLightState(string location, [FromBody] bool isOn)
+        {
+            return await lightService.SetLightState(location, isOn);
         }
     }
 }

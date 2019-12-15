@@ -23,32 +23,34 @@ namespace LightBot
         public async Task<string> SendCommand(string json)
         {
             await semaphore.WaitAsync();
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            var endpoint = new IPEndPoint(address, 9999);
-
-            await Task.Factory.FromAsync(
-                (callback, stateObject) => socket.BeginConnect(endpoint, callback, stateObject),
-                socket.EndConnect,
-                null);
-
-            var bytesSent = await SendMessage(socket, json);
-            if (bytesSent != json.Length)
+            try
             {
-                throw new SocketWriteException($"Tried to write {json.Length} bytes, only wrote {bytesSent} (msg={json})");
-            }
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                var endpoint = new IPEndPoint(address, 9999);
 
-            var response = await ReceiveMessage(socket);
-            semaphore.Release();
-            return response;
+                await Task.Factory.FromAsync(
+                    (callback, stateObject) => socket.BeginConnect(endpoint, callback, stateObject),
+                    socket.EndConnect,
+                    null);
+
+                await SendMessage(socket, json);
+
+                var response = await ReceiveMessage(socket);
+                return response;
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         /// <summary>
-        /// Sends a message using the provided socket. Returns the number of bytes sent.
+        /// Sends a message using the provided socket.
         /// </summary>
-        private async Task<int> SendMessage(Socket socket, string message)
+        private async Task SendMessage(Socket socket, string message)
         {
             var bytes = TpLinkUtils.Encrypt(message);
-            return await Task.Factory.FromAsync(
+            var bytesSent = await Task.Factory.FromAsync(
                 (callback, stateObject) => socket.BeginSend(
                     bytes,
                     0,
@@ -58,6 +60,10 @@ namespace LightBot
                     stateObject),
                 socket.EndSend,
                 null);
+            if (bytesSent != bytes.Length)
+            {
+                throw new SocketWriteException($"Tried to write {bytes.Length} bytes, only wrote {bytesSent} (msg={message})");
+            }
         }
 
         private async Task<string> ReceiveMessage(Socket socket)

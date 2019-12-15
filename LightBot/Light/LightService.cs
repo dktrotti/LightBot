@@ -51,5 +51,10 @@ namespace LightBot
         {
             return await new DebugCommand(command).Run(clients[location]);
         }
+
+        public async Task<Unit> SetLightState(string location, bool isOn)
+        {
+            return await new SetStateCommand(isOn).Run(clients[location]);
+        }
     }
 }

@@ -1,3 +1,7 @@
+async function setState(isOn) {
+    await fetch(buildRequest("light/bedroom/set_state", isOn))
+}
+
 async function sendDebugCommand(debugCommand) {
     const request = buildDebugRequest(debugCommand)
     const response = await fetch(request)
@@ -5,16 +9,18 @@ async function sendDebugCommand(debugCommand) {
 }
 
 function buildDebugRequest(debugCommand) {
+    const command = replaceAll(debugCommand, '"', '\\"')
+    return buildRequest("light/bedroom/debug", `"${command}"`)
+}
+
+function buildRequest(destination, body) {
     let myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
 
-    const command = replaceAll(debugCommand, '"', '\\"')
-    console.log(command)
-
-    return new Request("light", {
+    return new Request(destination, {
         method: 'POST',
         headers: myHeaders,
-        body: `"${command}"`
+        body: body
     })
 }
 
